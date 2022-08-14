@@ -445,10 +445,14 @@ add_rte_to_flat_rtable(PlannerGlobal *glob, RangeTblEntry *rte)
 	 * the executor would get confused by varnos that match the special varno
 	 * values.
 	 */
+	ereport(LOG,
+			(errcode(ERRCODE_PROGRAM_LIMIT_EXCEEDED),
+			 errmsg("Range table entries: %u - %u", list_length(glob->finalrtable), rte->relid)));
+
 	if (IS_SPECIAL_VARNO(list_length(glob->finalrtable)))
 		ereport(ERROR,
 				(errcode(ERRCODE_PROGRAM_LIMIT_EXCEEDED),
-				 errmsg("too many range table entries")));
+				 errmsg("too many range table entries: %u", list_length(glob->finalrtable))));
 
 	/*
 	 * If it's a plain relation RTE, add the table to relationOids.
